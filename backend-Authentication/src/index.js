@@ -17,7 +17,9 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
-app.use('/auth', authRoutes);
+app.get("/", (req, res) => {
+  res.send("Backend running successfully ");
+});app.use('/auth', authRoutes);
 
 // Error handler (should be last)
 app.use(errorHandler);
