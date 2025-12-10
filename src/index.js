@@ -39,18 +39,15 @@ app.use(errorHandler);
 
 const axios = require('axios');
 
-// Add this below your existing routes
-app.post('/send-sms', async (req, res) => {
+// Function to send SMS
+async function sendSMS(message = "Hello", destination = "94702670267") {
     try {
-        // You can customize the message and destination via req.body
-        const { message, destination } = req.body;
-
         const payload = {
             version: "1.0",
             applicationId: "APP_009662",
             password: "cda8c82bbb8e61ac23489baa52a9d731",
-            message: message || "Hello",
-            destinationAddresses: [ `tel:${destination || '94702670267'}` ],
+            message,
+            destinationAddresses: [ `tel:${destination}` ],
             sourceAddress: "77000",
             deliveryStatusRequest: "1",
             encoding: "245",
@@ -61,22 +58,26 @@ app.post('/send-sms', async (req, res) => {
             headers: { 'Content-Type': 'application/json' }
         });
 
-        res.status(200).json({
-            message: 'SMS sent successfully',
-            data: response.data
-        });
+        console.log('SMS sent successfully', response.data);
     } catch (err) {
         console.error('SMS sending error:', err.response?.data || err.message);
-        res.status(500).json({ message: 'Failed to send SMS', error: err.response?.data || err.message });
     }
-});
+}
 
 
 
 // Start server only if run directly (not in Vercel)
 if (require.main === module) {
     const PORT = process.env.PORT || 5001;
-    app.listen(PORT, () => console.log(`Auth server running on port ${PORT}`));
+
+    // Wrap server start in an async function
+    (async () => {
+        app.listen(PORT, () => console.log(`Auth server running on port ${PORT}`));
+
+        // Call SMS after server starts
+        await sendSMS("Server started successfully!", "94702670267");
+    })();
 }
+
 
 module.exports = app;
