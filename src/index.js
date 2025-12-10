@@ -18,6 +18,18 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
+
+// Ensure database connection before processing requests
+const dbConnect = require('./utils/db');
+app.use(async (req, res, next) => {
+    try {
+        await dbConnect();
+        next();
+    } catch (err) {
+        console.error('Database connection error:', err);
+        res.status(503).json({ message: 'Database connection failed' });
+    }
+});
 app.get("/", (req, res) => {
     res.send("Backend running successfully ");
 }); app.use('/auth', authRoutes);
@@ -25,10 +37,7 @@ app.get("/", (req, res) => {
 // Error handler (should be last)
 app.use(errorHandler);
 
-const dbConnect = require('./utils/db');
 
-// Connect to MongoDB
-dbConnect().catch(err => console.error('MongoDB connection error:', err));
 
 
 // Start server only if run directly (not in Vercel)
